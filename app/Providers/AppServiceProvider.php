@@ -28,27 +28,27 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Model::preventLazyLoading(!app()->isProduction());
-        Model::preventSilentlyDiscardingAttributes(!app()->isProduction());
+        Model::shouldBeStrict(!app()->isProduction());
 
-        DB::whenQueryingForLongerThan(500, function (Connection $connection) {
-            logger()
-                ->channel('telegram')
-                ->debug('whenQueryingForLongerThan:'. $connection->query()->toSql());
-        });
+//        if(app()->isProduction()) {
+            DB::listen(function ($query) {
+                if($query->time >= 100) {
+                    logger()
+                        ->channel('telegram')
+                        ->debug('query longer then 0.1 s: '. $query->time, [$query->sql, $query->bindings]);
+                }
+            });
 
-        $kernel = app(Kernel::class);
-
-        $kernel->whenRequestLifecycleIsLongerThan(
-            CarbonInterval::milliseconds(4),
-            fn($startedAt, $request) =>
+            app(Kernel::class)->whenRequestLifecycleIsLongerThan(
+                CarbonInterval::milliseconds(4),
+                fn($startedAt, $request) =>
                 logger()
                     ->channel('telegram')
                     ->debug('Жизненный цикл запроса превышает порог: ',  [
                         'user' => $request()->user()?->id,
                         'url' => $request()->url()
                     ])
-        );
-
+            );
+//        }
     }
 }
