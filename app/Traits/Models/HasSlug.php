@@ -5,40 +5,58 @@ declare(strict_types=1);
 namespace App\Traits\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Stringable;
 
 trait HasSlug
 {
     protected static function bootHasSlug(): void
     {
         static::creating(function (Model $model) {
-            $model->slug = $model->slug
-                ?? self::getSlug($model);
+            $model->makeSlug();
         });
     }
 
-    public static function getSlug(Model$model)
+    protected function makeSlug(): void
     {
-        $slugs = DB::table($model->getTable())->pluck('slug');
-
-        $field = $model->{self::slugFrom()};
-        $slug = str($field)->slug();
-
-        for($i = 1; $i < 1000; $i++) {
-            if(!in_array($slug, $slugs->toArray())) {
-                return $slug;
-            }
-            $slug = str($field)
+        $slug =  $this->slugUnique(
+            str($this->{$this->slugFrom()})
                 ->slug()
-                ->append('-' . $i);
-        }
+                ->value()
+        );
 
-        return $slug;
+        $this->{$this->slugColomn()} = $this->{$this->slugColomn()} ?? $slug;
     }
 
-    public static function slugFrom(): string
+    protected function slugColomn(): string
+    {
+        return 'slug';
+    }
+
+    protected function slugFrom(): string
     {
         return 'title';
+    }
+
+    protected function slugUnique(string $slug): string
+    {
+        $originalSlug = $slug;
+        $i = 0;
+
+        while ($this->isSlugExists($originalSlug)) {
+            $i++;
+            $originalSlug = $originalSlug . '-' . $i;
+        }
+
+        return $originalSlug;
+    }
+
+    public function isSlugExists(string $slug): bool
+    {
+        $query = $this->newQuery()
+            ->where($this->slugColomn(), $slug)
+            ->where($this->getKeyName(), '!=', $this->getKey())
+            ->withoutGlobalScopes();
+
+        return $query->exists();
+
     }
 }
