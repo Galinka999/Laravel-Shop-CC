@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Brand;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @extends Factory<Brand>
@@ -15,7 +14,7 @@ class BrandFactory extends Factory
     {
         return [
             'title' => $this->faker->company(),
-            'thumbnail' => $this->faker->getUmageFromFixTures('images/brands'),
+            'thumbnail' => $this->faker->getUmageFromFixTures('brands', 'images/brands'),
         ];
     }
 }
