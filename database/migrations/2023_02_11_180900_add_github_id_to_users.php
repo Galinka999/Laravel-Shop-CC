@@ -8,16 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('{{ table }}', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('github_id')->nullable();
         });
     }
 
     public function down(): void
     {
         if(!app()->isProduction()) {
-            Schema::dropIfExists('{{ table }}');
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('github_id');
+            });
         }
     }
 };

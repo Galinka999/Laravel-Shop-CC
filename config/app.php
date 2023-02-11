@@ -1,6 +1,7 @@
 <?php
 
 use App\Providers\TestingServiceProvider;
+use App\Providers\ViewServiceProvider;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -198,6 +199,7 @@ return [
         App\Providers\TelescopeServiceProvider::class,
 
         TestingServiceProvider::class,
+        ViewServiceProvider::class,
 
     ],
 
