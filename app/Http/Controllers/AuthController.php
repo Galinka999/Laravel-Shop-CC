@@ -44,7 +44,7 @@ class AuthController extends Controller
     {
         if(!auth()->attempt($request->validated())) {
             return back()->withErrors([
-                'email' => 'The provided credentials do not match our records.',
+                'email' => 'Предоставленные учетные данные не соответствуют нашим записям.',
             ])->onlyInput('email');
         }
 
