@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Support\Testing\FakerImageProvider;
 use Carbon\Laravel\ServiceProvider;
 use Faker\Factory;
 use Faker\Generator;
+use Support\Testing\FakerImageProvider;
 
 final class TestingServiceProvider extends ServiceProvider
 {
