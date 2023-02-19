@@ -15,7 +15,7 @@
         </div>
     @endif
     <div>
-        bkhbjnnlknlkmlk
+
     </div>
 
     @yield('content')
