@@ -9,12 +9,7 @@ use Tests\TestCase;
 
 class LoginControllerTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
-    public function test_login_success(): void
+    public function test_page_success(): void
     {
         $response = $this->get(action([LoginController::class, 'page']));
 
@@ -24,7 +19,7 @@ class LoginControllerTest extends TestCase
             ->assertViewIs('auth.login');
     }
 
-    public function test_page_success(): void
+    public function test_handle_success(): void
     {
         $password = '12345678';
 
@@ -47,7 +42,20 @@ class LoginControllerTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
-    public function test_handle_success(): void
+    public function test_handle_fail(): void
+    {
+        $request = SignInFormRequest::factory()->create([
+            'email' => 'notfound@mail.ru',
+            'password' => str()->random(10),
+        ]);
+
+        $this->post(action([LoginController::class, 'handle']), $request)
+            ->assertInvalid(['email']);
+
+        $this->assertGuest();
+    }
+
+    public function test_logout_success(): void
     {
         $user = Userfactory::new()->create([
             'email' => 'testing@cut.ru'
@@ -57,6 +65,11 @@ class LoginControllerTest extends TestCase
             ->delete(action([LoginController::class, 'logout']));
 
         $this->assertGuest();
+    }
 
+    public function test_logout_guest_middleware_fail(): void
+    {
+        $this->delete(action([LoginController::class, 'logout']))
+            ->assertRedirect(route('home'));
     }
 }

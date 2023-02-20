@@ -6,20 +6,45 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Requests\SignUpFormRequest;
 use App\Listeners\SendEmailNewUserListener;
 use App\Notifications\NewUserNotification;
+use Database\Factories\UserFactory;
 use Domain\Auth\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class RegisterControllerTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
+    protected array $request;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->request = SignUpFormRequest::factory()->create([
+            'email' => 'testing@caat.ru',
+            'password' => '12345678',
+            'password_confirmation' => '12345678'
+        ]);
+    }
+
+    private function request(): TestResponse
+    {
+        return $this->post(
+                action([RegisterController::class, 'handle']),
+                $this->request
+            );
+    }
+
+    private function findUser(): User
+    {
+        return User::query()->where(['email' => $this->request['email']])->first();
+    }
+
     public function test_page_success(): void
     {
         $response = $this->get(action([RegisterController::class, 'page']));
@@ -30,46 +55,68 @@ class RegisterControllerTest extends TestCase
             ->assertViewIs('auth.register');
     }
 
-    public function test_handle_success(): void
+    public function test_is_validation_success(): void
     {
-        Event::fake();
-        Notification::fake();
+        $this->request()->assertValid();
+    }
 
-        $request = SignUpFormRequest::factory()->create([
-            'email' => 'testing@caat.ru',
-            'password' => '12345678',
-            'password_confirmation' => '12345678'
-        ]);
+    public function test_should_fail_validation_on_password_confirm(): void
+    {
+        $this->request['password'] = '123';
+        $this->request['password_confirmation'] = '1234';
 
+        $this->request()->assertInvalid(['password']);
+    }
+
+    public function test_user_created_success(): void
+    {
         $this->assertDatabaseMissing('users', [
-            'email' => $request['email'],
+            'email' => $this->request['email'],
         ]);
 
-        $response = $this->post(
-            action([RegisterController::class, 'handle']),
-            $request
-        );
-
-        $response->assertValid();
+        $this->request();
 
         $this->assertDatabaseHas('users', [
-            'email' => $request['email'],
+            'email' => $this->request['email'],
+        ]);
+    }
+
+    public function test_should_fail_validation_on_unique_email(): void
+    {
+        UserFactory::new()->create([
+            'email' => $this->request['email'],
         ]);
 
-        /* @var Authenticatable $user */
-        $user = User::query()->where(['email' => $request['email']])->first();
+        $this->assertDatabaseHas('users', [
+            'email' => $this->request['email'],
+        ]);
+
+        $this->request()->assertInvalid(['email']);
+    }
+
+    public function test_is_registered_event_and_listeners_dispatched(): void
+    {
+        Event::fake();
+
+        $this->request();
 
         Event::assertDispatched(Registered::class);
         Event::assertListening(Registered::class, SendEmailNewUserListener::class);
+    }
 
-        $event = new Registered($user);
-        $listener = new SendEmailNewUserListener();
-        $listener->handle($event);
+    public function test_notification_sent(): void
+    {
+        $this->request();
 
-        Notification::assertSentTo($user, NewUserNotification::class);
+        Notification::assertSentTo($this->findUser(), NewUserNotification::class);
+    }
+
+    public function test_user_authenticated_after_and_redirected(): void
+    {
+        $response = $this->request();
 
         $response->assertRedirect(route('home'));
 
-        $this->assertAuthenticatedAs($user);
+        $this->assertAuthenticatedAs($this->findUser());
     }
 }
