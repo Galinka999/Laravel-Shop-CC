@@ -25,13 +25,13 @@ class SocialAuthController extends Controller
         if($driver !== 'github') {
             throw new DomainException('Дравер не поддерживается.');
         }
-        $driverUser = Socialite::driver($driver)->stateless()->user();
+        $driverUser = Socialite::driver($driver)->user();
 
         $user = User::query()->updateOrCreate([
-            $driver.'_id' => $driverUser->id,
+            $driver.'_id' => $driverUser->getId(),
         ], [
-            'name' => $driverUser->name ?? $driverUser->email,
-            'email' => $driverUser->email,
+            'name' => $driverUser->getName() ?? $driverUser->getEmail(),
+            'email' => $driverUser->getEmail(),
             'password' => bcrypt(str()->random(8)),
         ]);
 
