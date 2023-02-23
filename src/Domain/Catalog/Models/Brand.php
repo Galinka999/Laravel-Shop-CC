@@ -4,6 +4,7 @@ namespace Domain\Catalog\Models;
 
 use App\Models\Product;
 use Database\Factories\BrandFactory;
+use Domain\Catalog\QueryBuilders\BrandQueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ use Support\Traits\Models\HasThumbnail;
 
 /**
  * @mixin Builder
+ * @method static Brand|BrandQueryBuilder query()
  * @property string slug
  * @property string title
  * @property string thumbnail
@@ -43,9 +45,8 @@ class Brand extends Model
         return $this->hasMany(Product::class);
     }
 
-    public function scopeHomePage(Builder $query)
+    public function newEloquentBuilder($query): BrandQueryBuilder
     {
-        $query->where('on_home_page', true)->orderBy('sorting')->limit(6);
+        return new BrandQueryBuilder($query);
     }
-
 }
