@@ -1,37 +1,51 @@
 <?php
 
-namespace App\Models;
+namespace Domain\Catalog\Models;
 
+use App\Models\Product;
+use Database\Factories\BrandFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Support\Traits\Models\HasSlug;
+use Support\Traits\Models\HasThumbnail;
 
 /**
  * @mixin Builder
  * @property string slug
  * @property string title
+ * @property string thumbnail
+ * @property boolean on_home_page
+ * @property integer sorting
  */
-class Category extends Model
+class Brand extends Model
 {
     use HasFactory;
     use HasSlug;
+    use HasThumbnail;
 
     protected $fillable = [
-        'title',
         'slug',
+        'title',
+        'thumbnail',
         'on_home_page',
         'sorting',
     ];
 
-    public function products(): belongsToMany
+    protected function thumbnailDir(): string
     {
-        return $this->belongsToMany(Product::class);
+        return 'brands';
+    }
+
+    public function products(): hasMany
+    {
+        return $this->hasMany(Product::class);
     }
 
     public function scopeHomePage(Builder $query)
     {
         $query->where('on_home_page', true)->orderBy('sorting')->limit(6);
     }
+
 }
