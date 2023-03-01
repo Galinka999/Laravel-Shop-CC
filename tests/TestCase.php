@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -17,6 +18,8 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         Notification::fake();
+        Storage::fake('images');
+
         Http::preventStrayRequests();
     }
 }

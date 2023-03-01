@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Support\Testing;
 
 use Faker\Provider\Base;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 final class FakerImageProvider extends Base
 {
+    protected $nameFolder = 'images';
+
     public function getUmageLoremFlickr(string $dir, int $width = 500, int $height = 500): string
     {
         $this->checkDirectory($dir);
@@ -23,24 +26,33 @@ final class FakerImageProvider extends Base
         return '/storage/' . $filename;
     }
 
-    public function getUmageFromFixTures(string $fixturesDir, string $storageDir): string
+    public function getUmageFromFixTures(string $dir): string
     {
-        $this->checkDirectory($storageDir);
+        $storage = $this->getStorageDisk();
+
+        $this->checkDirectory($dir);
 
         $filename = $this->generator->file(
-            base_path("/tests/FixTures/images/$fixturesDir"),
-            Storage::path($storageDir),
+            base_path("/tests/FixTures/images/$dir"),
+            $storage->path($dir),
             false
         );
 
-        return '/storage/'. trim($storageDir . '/') . '/' . $filename;
+        return "/storage/{$this->nameFolder}/". trim($dir . '/') . '/' . $filename;
+    }
+
+    protected function getStorageDisk(): Filesystem
+    {
+        return Storage::disk($this->nameFolder);
     }
 
     protected function checkDirectory(string $dir)
     {
+        $storage = $this->getStorageDisk();
+
         try {
-            if(!Storage::exists($dir)) {
-                Storage::makeDirectory($dir);
+            if(!$storage->exists($dir)) {
+                $storage->makeDirectory($dir);
             }
         } catch (\Throwable $e) {
             throw new \Exception($e->getMessage());
