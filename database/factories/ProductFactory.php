@@ -20,6 +20,7 @@ class ProductFactory extends Factory
             'thumbnail' => $this->faker->getUmageFromFixTures('products', 'images/products'),
             'on_home_page' => $this->faker->boolean(),
             'sorting' => $this->faker->numberBetween(1, 999),
+            'text' => $this->faker->realText(),
         ];
     }
 }
