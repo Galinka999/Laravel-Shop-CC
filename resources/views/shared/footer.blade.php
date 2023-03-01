@@ -8,7 +8,7 @@
                 </a>
             </div><!-- /.footer-logo -->
             <div class="footer-copyright order-2 lg:order-1 basis-full lg:basis-1/3 mt-8 lg:mt-0">
-                <div class="text-[#999] text-xxs xs:text-xs sm:text-sm text-center">CutCode, {{ now()->year }} © Все права защещены.</div>
+                <div class="text-[#999] text-xxs xs:text-xs sm:text-sm text-center">CutCode, {{ now()->year }} © Все права защищены.</div>
             </div><!-- /.footer-copyright -->
             <div class="footer-social order-1 lg:order-2 basis-full sm:basis-1/2 lg:basis-1/3 mt-8 sm:mt-0">
                 <div class="flex flex-wrap items-center justify-center sm:justify-end space-x-6">
@@ -48,7 +48,7 @@
                 <div class="flex items-center">
                     <img src="{{ Vite::image('avatar.jpg') }}" class="w-14 h-14 rounded-full" alt="{{ auth()->user()->name }}">
                     <div class="flex flex-col items-start ml-4">
-                        <span class="text-dark text-xs md:text-sm font-bold">Данил Шуцкий</span>
+                        <span class="text-dark text-xs md:text-sm font-bold">{{ auth()->user()->name }}</span>
                         <a href="#" class="inline-flex items-center text-dark hover:text-pink">
                             <svg class="shrink-0 w-[14px] h-[14px]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="m19.026 7.643-3.233-3.232a.833.833 0 0 0-1.178 1.178l3.232 3.233c.097.098.18.207.25.325-.012 0-.022-.007-.035-.007l-13.07.027a.833.833 0 1 0 0 1.666l13.066-.026c.023 0 .042-.012.064-.014a1.621 1.621 0 0 1-.278.385l-3.232 3.233a.833.833 0 1 0 1.178 1.178l3.233-3.232a3.333 3.333 0 0 0 0-4.714h.003Z"/>
@@ -67,7 +67,7 @@
 
             <nav class="flex flex-col mt-8">
                 <a href="{{ route('home') }}" class="self-start py-1 text-dark hover:text-pink text-md font-bold">Главная</a>
-                <a href="catalog.html" class="self-start py-1 text-dark hover:text-pink text-md font-bold">Каталог товаров</a>
+                <a href="{{ route('catalog') }}" class="self-start py-1 text-dark hover:text-pink text-md font-bold">Каталог товаров</a>
                 <a href="orders.html" class="self-start py-1 text-dark hover:text-pink text-md font-bold">Мои заказы</a>
                 <a href="cart.html" class="self-start py-1 text-dark hover:text-pink text-md font-bold">Корзина</a>
             </nav>
